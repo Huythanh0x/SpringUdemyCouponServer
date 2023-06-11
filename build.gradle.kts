@@ -17,6 +17,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("mysql:mysql-connector-java:8.0.28")
+    implementation("org.json:json:20220320")
+    implementation("org.jsoup:jsoup:1.15.4")
 }
 
 tasks.withType<Test> {

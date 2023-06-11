@@ -1,0 +1,46 @@
+package com.huythanh0x.springudemycouponserver.crawler_runner.crawler;
+
+import com.huythanh0x.springudemycouponserver.crawler_runner.base.CouponUrlCrawlerBase;
+import com.huythanh0x.springudemycouponserver.crawler_runner.fetcher.WebContentFetcher;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class EnextCrawler extends CouponUrlCrawlerBase {
+    String apiUrl = "https://jobs.e-next.in/public/assets/data/udemy.json";
+    @Value("${custom.number-of-enext-coupon}")
+    int maxCouponRequest;
+
+    @Override
+    public List<String> getAllCouponUrls() {
+        var jsonArray = fetchListJsonFromAPI(apiUrl);
+        List<String> allUrls = new ArrayList<>();
+        for (var jo : jsonArray) {
+            JSONObject jsonObject = (JSONObject) jo;
+            allUrls.add(extractCouponUrl(jsonObject));
+        }
+        if (maxCouponRequest < allUrls.size()) {
+            return allUrls.subList(0, maxCouponRequest);
+        } else {
+            return allUrls;
+        }
+    }
+
+    String extractCouponUrl(JSONObject jsonObject) {
+        try {
+            String url = jsonObject.getString("url");
+            String couponCode = jsonObject.getString("code");
+            return String.format("https://www.udemy.com/course/%s/?couponCode=%s", url, couponCode);
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
+    }
+
+    public JSONArray fetchListJsonFromAPI(String apiUrl) {
+        return new WebContentFetcher().getJsonArrayFrom(apiUrl);
+    }
+}
