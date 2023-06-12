@@ -11,7 +11,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class LastFetchTimeManager {
-    public void dumpFetchedTimeJsonToFile() {
+    public static void dumpFetchedTimeJsonToFile() {
         String jsonFilePath = "fetched_time.json";
         var resultJson = new JSONObject();
         resultJson.put("localTime", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -22,7 +22,7 @@ public class LastFetchTimeManager {
         }
     }
 
-    public Long loadLasFetchedTimeInMilliSecond() {
+    public static Long loadLasFetchedTimeInMilliSecond() {
         try {
             String couponsJson = new String(Files.readAllBytes(Paths.get("fetched_time.json")));
             var responseJsonObject = new JSONObject(couponsJson);

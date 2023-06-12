@@ -1,6 +1,7 @@
 package com.huythanh0x.springudemycouponserver.service;
 
 import com.huythanh0x.springudemycouponserver.crawler_runner.UdemyCouponCourseExtractor;
+import com.huythanh0x.springudemycouponserver.dto.CouponResponseData;
 import com.huythanh0x.springudemycouponserver.model.CouponCourseData;
 import com.huythanh0x.springudemycouponserver.repository.CouponCourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,21 +19,23 @@ public class CourseResponseService {
         this.couponCourseRepository = couponCourseRepository;
     }
 
-    public List<CouponCourseData> getCoupons(String numberOfCoupon) {
+    public CouponResponseData getCoupons(String numberOfCoupon) {
         List<CouponCourseData> allCouponCourses = couponCourseRepository.findAll();
         if (Integer.parseInt(numberOfCoupon) < allCouponCourses.size()) {
-            return allCouponCourses.subList(0, Integer.parseInt(numberOfCoupon));
+            return new CouponResponseData(allCouponCourses.subList(0, Integer.parseInt(numberOfCoupon)));
         } else {
-            return allCouponCourses;
+            return new CouponResponseData(allCouponCourses);
         }
     }
 
-    public List<CouponCourseData> filterCoupons(String rating, String contentLength, String level, String category) {
-        return couponCourseRepository.findAll().stream().filter(coupon -> coupon.getCategory().contains(category) && coupon.getLevel().contains(level) && coupon.getContentLength() > Float.parseFloat(contentLength) && coupon.getRating() > Float.parseFloat(rating)).collect(Collectors.toList());
+    public CouponResponseData filterCoupons(String rating, String contentLength, String level, String category) {
+        List<CouponCourseData> filterCouponCourses = couponCourseRepository.findAll().stream().filter(coupon -> coupon.getCategory().contains(category) && coupon.getLevel().contains(level) && coupon.getContentLength() > Float.parseFloat(contentLength) && coupon.getRating() > Float.parseFloat(rating)).collect(Collectors.toList());
+        return new CouponResponseData(filterCouponCourses);
     }
 
-    public List<CouponCourseData> searchCoupons(String querySearch) {
-        return couponCourseRepository.findByTitleContainingOrDescriptionContainingOrHeadingContaining(querySearch, querySearch, querySearch);
+    public CouponResponseData searchCoupons(String querySearch) {
+        List<CouponCourseData> searchedCouponCourses = couponCourseRepository.findByTitleContainingOrDescriptionContainingOrHeadingContaining(querySearch, querySearch, querySearch);
+        return new CouponResponseData(searchedCouponCourses);
     }
 
     public CouponCourseData saveNewCouponUrl(String couponUrl) {

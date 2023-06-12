@@ -6,7 +6,6 @@ import com.huythanh0x.springudemycouponserver.model.CouponCourseData;
 import com.huythanh0x.springudemycouponserver.model.ExpiredCourseData;
 import com.huythanh0x.springudemycouponserver.repository.CouponCourseRepository;
 import com.huythanh0x.springudemycouponserver.repository.ExpiredCouponRepository;
-import com.huythanh0x.springudemycouponserver.utils.Constants;
 import com.huythanh0x.springudemycouponserver.utils.LastFetchTimeManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -35,14 +34,16 @@ public class CrawlerRunner implements ApplicationRunner {
 
     RealDiscountCrawler realDiscountCrawler;
 
+    Integer intervalTime;
     @Value("${custom.number-of-request-thread}")
     Integer numberOfThread;
 
-    public CrawlerRunner(CouponCourseRepository couponCourseRepository, ExpiredCouponRepository expiredCouponRepository, EnextCrawler enextCrawler, RealDiscountCrawler realDiscountCrawler) {
+    public CrawlerRunner(CouponCourseRepository couponCourseRepository, ExpiredCouponRepository expiredCouponRepository, EnextCrawler enextCrawler, RealDiscountCrawler realDiscountCrawler, @Value("${custom.interval-time}") Integer intervalTime) {
         this.couponCourseRepository = couponCourseRepository;
         this.expiredCouponRepository = expiredCouponRepository;
         this.enextCrawler = enextCrawler;
         this.realDiscountCrawler = realDiscountCrawler;
+        this.intervalTime = intervalTime;
     }
 
     @Override
@@ -51,7 +52,7 @@ public class CrawlerRunner implements ApplicationRunner {
     }
 
     public void startCrawler() {
-        AtomicLong startTime = new AtomicLong(new LastFetchTimeManager().loadLasFetchedTimeInMilliSecond());
+        AtomicLong startTime = new AtomicLong(LastFetchTimeManager.loadLasFetchedTimeInMilliSecond());
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 delayUntilTheNextRound(startTime.get());
@@ -60,11 +61,8 @@ public class CrawlerRunner implements ApplicationRunner {
                     startTime.set(System.currentTimeMillis());
                     List<String> allCouponUrls = new ArrayList<>();
                     allCouponUrls.addAll(enextCrawler.getAllCouponUrls());
-                    System.out.println("Enext " + allCouponUrls);
                     allCouponUrls.addAll(realDiscountCrawler.getAllCouponUrls());
-                    System.out.println("Enext + Read Discount " + allCouponUrls);
                     List<String> allCouponUrlsSet = filterValidCouponUrls(allCouponUrls);
-                    System.out.println("Coupon URL set: " + allCouponUrlsSet.size());
                     saveAllCouponData(allCouponUrlsSet, numberOfThread);
                     delayUntilTheNextRound(startTime.get());
                 }
@@ -78,9 +76,9 @@ public class CrawlerRunner implements ApplicationRunner {
         couponCourseRepository.deleteAll();
     }
 
-    private static void delayUntilTheNextRound(long startTime) throws InterruptedException {
+    private void delayUntilTheNextRound(long startTime) throws InterruptedException {
         long runTime = System.currentTimeMillis() - startTime;
-        long delayTime = Math.max(Constants.INTERVAL - runTime, 0);
+        long delayTime = Math.max(intervalTime - runTime, 0);
         System.out.println("\u001B[32mWait for " + delayTime + " milliseconds until the next run\u001B[32m");
         Thread.sleep(delayTime);
     }
@@ -111,7 +109,7 @@ public class CrawlerRunner implements ApplicationRunner {
             // Wait until all threads are finished
         }
         System.out.println("All threads finished");
-        new LastFetchTimeManager().dumpFetchedTimeJsonToFile();
+        LastFetchTimeManager.dumpFetchedTimeJsonToFile();
         dumpDataToTheDatabase(validCoupons, failedToValidateCouponUrls, expiredCouponUrls);
     }
 

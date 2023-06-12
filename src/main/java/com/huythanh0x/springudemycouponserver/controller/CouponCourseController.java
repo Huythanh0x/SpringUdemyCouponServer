@@ -1,5 +1,6 @@
 package com.huythanh0x.springudemycouponserver.controller;
 
+import com.huythanh0x.springudemycouponserver.dto.CouponResponseData;
 import com.huythanh0x.springudemycouponserver.model.CouponCourseData;
 import com.huythanh0x.springudemycouponserver.service.CourseResponseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(value = "api/v1/coupons")
 public class CouponCourseController {
@@ -19,7 +21,7 @@ public class CouponCourseController {
 
     @GetMapping({"/", ""})
     @ResponseBody
-    public List<CouponCourseData> getCoupons(@RequestParam(required = false, defaultValue = "100") String numberOfCoupon) {
+    public CouponResponseData getCoupons(@RequestParam(required = false, defaultValue = "100") String numberOfCoupon) {
         return courseResponseService.getCoupons(numberOfCoupon);
     }
 
@@ -43,13 +45,13 @@ public class CouponCourseController {
     }
 
     @GetMapping("/filter")
-    public List<CouponCourseData> filterCoupons(@RequestParam(defaultValue = "") String category, @RequestParam(defaultValue = "-1") String rating, @RequestParam(defaultValue = "-1") String contentLength, @RequestParam(defaultValue = "") String level) {
+    public CouponResponseData filterCoupons(@RequestParam(defaultValue = "") String category, @RequestParam(defaultValue = "-1") String rating, @RequestParam(defaultValue = "-1") String contentLength, @RequestParam(defaultValue = "") String level) {
         return courseResponseService.filterCoupons(rating, contentLength, level, category);
     }
 
 
     @GetMapping("/search")
-    public List<CouponCourseData> searchCoupons(@RequestParam String querySearch) {
+    public CouponResponseData searchCoupons(@RequestParam String querySearch) {
         return courseResponseService.searchCoupons(querySearch);
     }
 }
