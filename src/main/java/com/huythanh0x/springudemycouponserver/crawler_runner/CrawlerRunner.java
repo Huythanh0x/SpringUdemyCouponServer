@@ -31,12 +31,18 @@ public class CrawlerRunner implements ApplicationRunner {
     CouponCourseRepository couponCourseRepository;
     ExpiredCouponRepository expiredCouponRepository;
 
+    EnextCrawler enextCrawler;
+
+    RealDiscountCrawler realDiscountCrawler;
+
     @Value("${custom.number-of-request-thread}")
     Integer numberOfThread;
 
-    public CrawlerRunner(CouponCourseRepository couponCourseRepository, ExpiredCouponRepository expiredCouponRepository) {
+    public CrawlerRunner(CouponCourseRepository couponCourseRepository, ExpiredCouponRepository expiredCouponRepository, EnextCrawler enextCrawler, RealDiscountCrawler realDiscountCrawler) {
         this.couponCourseRepository = couponCourseRepository;
         this.expiredCouponRepository = expiredCouponRepository;
+        this.enextCrawler = enextCrawler;
+        this.realDiscountCrawler = realDiscountCrawler;
     }
 
     @Override
@@ -53,8 +59,10 @@ public class CrawlerRunner implements ApplicationRunner {
                     clearOldCourses();
                     startTime.set(System.currentTimeMillis());
                     List<String> allCouponUrls = new ArrayList<>();
-                    allCouponUrls.addAll(new EnextCrawler().getAllCouponUrls());
-                    allCouponUrls.addAll(new RealDiscountCrawler().getAllCouponUrls());
+                    allCouponUrls.addAll(enextCrawler.getAllCouponUrls());
+                    System.out.println("Enext " + allCouponUrls);
+                    allCouponUrls.addAll(realDiscountCrawler.getAllCouponUrls());
+                    System.out.println("Enext + Read Discount " + allCouponUrls);
                     List<String> allCouponUrlsSet = filterValidCouponUrls(allCouponUrls);
                     System.out.println("Coupon URL set: " + allCouponUrlsSet.size());
                     saveAllCouponData(allCouponUrlsSet, numberOfThread);

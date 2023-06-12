@@ -5,14 +5,19 @@ import com.huythanh0x.springudemycouponserver.crawler_runner.fetcher.WebContentF
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class EnextCrawler extends CouponUrlCrawlerBase {
     String apiUrl = "https://jobs.e-next.in/public/assets/data/udemy.json";
-    @Value("${custom.number-of-enext-coupon}")
     int maxCouponRequest;
+
+    EnextCrawler(@Value("${custom.number-of-enext-coupon}") int maxCouponRequest) {
+        this.maxCouponRequest = maxCouponRequest;
+    }
 
     @Override
     public List<String> getAllCouponUrls() {
@@ -22,6 +27,7 @@ public class EnextCrawler extends CouponUrlCrawlerBase {
             JSONObject jsonObject = (JSONObject) jo;
             allUrls.add(extractCouponUrl(jsonObject));
         }
+        System.out.println("Enext jsonArray length: " + jsonArray.length() + " maxCouponRequest: " + maxCouponRequest);
         if (maxCouponRequest < allUrls.size()) {
             return allUrls.subList(0, maxCouponRequest);
         } else {

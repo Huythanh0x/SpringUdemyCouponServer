@@ -5,14 +5,20 @@ import com.huythanh0x.springudemycouponserver.crawler_runner.fetcher.WebContentF
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class RealDiscountCrawler extends CouponUrlCrawlerBase {
-    @Value("${custom.number-of-real-discount-coupon}")
     int maxCouponRequest;
-    String apiUrl = String.format("https://www.real.discount/api-web/all-courses/?store=Udemy&page=1&per_page=%s&orderby=undefined&free=0&search=&language=&cat=", maxCouponRequest);
+    String apiUrl;
+
+    RealDiscountCrawler(@Value("${custom.number-of-real-discount-coupon}") int maxCouponRequest) {
+        this.maxCouponRequest = maxCouponRequest;
+        this.apiUrl = String.format("https://www.real.discount/api-web/all-courses/?store=Udemy&page=1&per_page=%s&orderby=undefined&free=0&search=&language=&cat=", maxCouponRequest);
+    }
 
     @Override
     public List<String> getAllCouponUrls() {
@@ -22,6 +28,7 @@ public class RealDiscountCrawler extends CouponUrlCrawlerBase {
             JSONObject jsonObject = (JSONObject) jo;
             allUrls.add(extractCouponUrl(jsonObject));
         }
+        System.out.println("Realdiscount jsonArray length: " + jsonArray.length() + " maxCouponRequest: " + maxCouponRequest);
         return allUrls;
     }
 
