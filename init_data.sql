@@ -1,5 +1,7 @@
-drop table expired_course_data;
-drop table coupon_course_data;
+drop table if exists expired_course_data;
+drop table if exists coupon_course_data;
+drop table if exists log_app_data;
+
 
 CREATE TABLE coupon_course_data
 (
@@ -30,7 +32,24 @@ CREATE TABLE expired_course_data
     time_stamp TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-show tables;
+CREATE TABLE log_app_data
+(
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    category     ENUM ('EXCEPTION', 'REQUEST', 'RUNNER') NOT NULL,
+    owner        VARCHAR(255)                            NOT NULL,
+    tag          VARCHAR(255)                            NOT NULL,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    content      TEXT
+);
 
-select course_id, title from coupon_course_data;
-select coupon_url from expired_course_data;
+show
+    tables;
+
+select course_id, title
+from coupon_course_data;
+
+select *
+from expired_course_data;
+
+select *
+from log_app_data;

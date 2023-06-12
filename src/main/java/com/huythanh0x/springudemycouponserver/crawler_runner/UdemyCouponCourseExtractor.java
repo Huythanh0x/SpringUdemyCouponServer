@@ -1,9 +1,9 @@
 package com.huythanh0x.springudemycouponserver.crawler_runner;
 
 import com.huythanh0x.springudemycouponserver.crawler_runner.fetcher.WebContentFetcher;
-import com.huythanh0x.springudemycouponserver.model.CouponCourseData;
-import com.huythanh0x.springudemycouponserver.model.CouponJsonData;
-import com.huythanh0x.springudemycouponserver.model.CourseJsonData;
+import com.huythanh0x.springudemycouponserver.model.coupon.CouponCourseData;
+import com.huythanh0x.springudemycouponserver.model.coupon.CouponJsonData;
+import com.huythanh0x.springudemycouponserver.model.coupon.CourseJsonData;
 import com.huythanh0x.springudemycouponserver.utils.UrlUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;

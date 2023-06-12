@@ -1,4 +1,4 @@
-package com.huythanh0x.springudemycouponserver.model;
+package com.huythanh0x.springudemycouponserver.model.coupon;
 
 public class CourseJsonData {
     private String category;

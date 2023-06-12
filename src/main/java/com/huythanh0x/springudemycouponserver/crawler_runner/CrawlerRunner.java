@@ -2,10 +2,13 @@ package com.huythanh0x.springudemycouponserver.crawler_runner;
 
 import com.huythanh0x.springudemycouponserver.crawler_runner.crawler.EnextCrawler;
 import com.huythanh0x.springudemycouponserver.crawler_runner.crawler.RealDiscountCrawler;
-import com.huythanh0x.springudemycouponserver.model.CouponCourseData;
-import com.huythanh0x.springudemycouponserver.model.ExpiredCourseData;
+import com.huythanh0x.springudemycouponserver.model.coupon.CouponCourseData;
+import com.huythanh0x.springudemycouponserver.model.coupon.ExpiredCourseData;
+import com.huythanh0x.springudemycouponserver.model.log.LogCategory;
+import com.huythanh0x.springudemycouponserver.model.log.LogAppData;
 import com.huythanh0x.springudemycouponserver.repository.CouponCourseRepository;
 import com.huythanh0x.springudemycouponserver.repository.ExpiredCouponRepository;
+import com.huythanh0x.springudemycouponserver.repository.LogRepository;
 import com.huythanh0x.springudemycouponserver.utils.LastFetchTimeManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -13,7 +16,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +31,7 @@ import java.util.stream.Stream;
 public class CrawlerRunner implements ApplicationRunner {
     CouponCourseRepository couponCourseRepository;
     ExpiredCouponRepository expiredCouponRepository;
+    LogRepository logRepository;
 
     EnextCrawler enextCrawler;
 
@@ -38,17 +41,18 @@ public class CrawlerRunner implements ApplicationRunner {
     @Value("${custom.number-of-request-thread}")
     Integer numberOfThread;
 
-    public CrawlerRunner(CouponCourseRepository couponCourseRepository, ExpiredCouponRepository expiredCouponRepository, EnextCrawler enextCrawler, RealDiscountCrawler realDiscountCrawler, @Value("${custom.interval-time}") Integer intervalTime) {
-        this.couponCourseRepository = couponCourseRepository;
-        this.expiredCouponRepository = expiredCouponRepository;
-        this.enextCrawler = enextCrawler;
-        this.realDiscountCrawler = realDiscountCrawler;
-        this.intervalTime = intervalTime;
-    }
-
     @Override
     public void run(ApplicationArguments args) {
         startCrawler();
+    }
+
+    public CrawlerRunner(CouponCourseRepository couponCourseRepository, ExpiredCouponRepository expiredCouponRepository, LogRepository logRepository, EnextCrawler enextCrawler, RealDiscountCrawler realDiscountCrawler, @Value("${custom.interval-time}") Integer intervalTime) {
+        this.couponCourseRepository = couponCourseRepository;
+        this.expiredCouponRepository = expiredCouponRepository;
+        this.logRepository = logRepository;
+        this.enextCrawler = enextCrawler;
+        this.realDiscountCrawler = realDiscountCrawler;
+        this.intervalTime = intervalTime;
     }
 
     public void startCrawler() {
@@ -57,23 +61,20 @@ public class CrawlerRunner implements ApplicationRunner {
             try {
                 delayUntilTheNextRound(startTime.get());
                 while (true) {
-                    clearOldCourses();
                     startTime.set(System.currentTimeMillis());
                     List<String> allCouponUrls = new ArrayList<>();
                     allCouponUrls.addAll(enextCrawler.getAllCouponUrls());
                     allCouponUrls.addAll(realDiscountCrawler.getAllCouponUrls());
-                    List<String> allCouponUrlsSet = filterValidCouponUrls(allCouponUrls);
-                    saveAllCouponData(allCouponUrlsSet, numberOfThread);
+                    logRepository.save(new LogAppData(LogCategory.RUNNER, "SERVER", "allCouponUrls", String.format("length = %s", allCouponUrls.size())));
+                    List<String> filterCouponUrls = filterValidCouponUrls(allCouponUrls);
+                    logRepository.save(new LogAppData(LogCategory.RUNNER, "SERVER", "filterCouponUrls", String.format("length = %s", filterCouponUrls.size())));
+                    saveAllCouponData(filterCouponUrls, numberOfThread);
                     delayUntilTheNextRound(startTime.get());
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logRepository.save(new LogAppData(LogCategory.EXCEPTION, "SERVER", "startCrawler", e.getMessage()));
             }
         });
-    }
-
-    private void clearOldCourses() {
-        couponCourseRepository.deleteAll();
     }
 
     private void delayUntilTheNextRound(long startTime) throws InterruptedException {
@@ -99,7 +100,7 @@ public class CrawlerRunner implements ApplicationRunner {
                         expiredCouponUrls.add(couponUrl);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logRepository.save(new LogAppData(LogCategory.EXCEPTION, "SERVER", "startCrawler", e.getMessage()));
                     failedToValidateCouponUrls.add(couponUrl + " " + e);
                 }
             });
@@ -113,19 +114,18 @@ public class CrawlerRunner implements ApplicationRunner {
         dumpDataToTheDatabase(validCoupons, failedToValidateCouponUrls, expiredCouponUrls);
     }
 
-    private void keepLogsInTextFiles(Set<CouponCourseData> validCoupons, Set<String> failedToValidateCouponUrls, Set<String> expiredCoupons) throws IOException {
-    }
-
     private void dumpDataToTheDatabase(Set<CouponCourseData> validCoupons, Set<String> failedToValidateCouponUrls, Set<String> expiredCouponUrls) {
         List<ExpiredCourseData> allExpiredCourses = expiredCouponUrls.stream().map(ExpiredCourseData::new).collect(Collectors.toList());
         expiredCouponRepository.saveAll(allExpiredCourses);
         couponCourseRepository.deleteAllCouponsByUrl(expiredCouponUrls);
         couponCourseRepository.saveAll(validCoupons);
-        failedToValidateCouponUrls.stream().forEach(System.out::print);
+        logRepository.save(new LogAppData(LogCategory.RUNNER, "SERVER", "expiredCouponUrls", String.format("length = %s", expiredCouponUrls.size())));
+        logRepository.save(new LogAppData(LogCategory.RUNNER, "SERVER", "validCoupons", String.format("length = %s", validCoupons.size())));
+        logRepository.save(new LogAppData(LogCategory.RUNNER, "SERVER", "failedToValidateCouponUrls", String.format("length = %s", failedToValidateCouponUrls.size())));
     }
 
     private List<String> filterValidCouponUrls(List<String> newCouponUrls) {
-        List<String> allOldCoupons = couponCourseRepository.findAll().stream().map(CouponCourseData::getCouponUrl).collect(Collectors.toList());
+        List<String> allOldCoupons = couponCourseRepository.findAll().stream().map(CouponCourseData::getCouponUrl).toList();
         List<ExpiredCourseData> allExpiredCoupons = expiredCouponRepository.findAll();
         Stream<String> combinedStreams = Stream.concat(allOldCoupons.stream(), newCouponUrls.stream());
         return combinedStreams.filter(couponUrl -> couponUrl != null && !allExpiredCoupons.stream().map(ExpiredCourseData::getCouponUrl).toString().contains(couponUrl)).collect(Collectors.toList());

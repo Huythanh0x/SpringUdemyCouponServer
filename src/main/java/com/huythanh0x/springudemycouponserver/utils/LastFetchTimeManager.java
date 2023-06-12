@@ -34,4 +34,16 @@ public class LastFetchTimeManager {
             return (long) Integer.MIN_VALUE;
         }
     }
+
+    public static LocalDateTime loadLasFetchedTimeInDateTimeString() {
+        try {
+            String couponsJson = new String(Files.readAllBytes(Paths.get("fetched_time.json")));
+            var responseJsonObject = new JSONObject(couponsJson);
+            var dateTimeString = responseJsonObject.getString("localTime");
+            var formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+            return LocalDateTime.parse(dateTimeString, formatter);
+        } catch (IOException e) {
+            return null;
+        }
+    }
 }

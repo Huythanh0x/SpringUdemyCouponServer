@@ -1,8 +1,9 @@
-package com.huythanh0x.springudemycouponserver.model;
+package com.huythanh0x.springudemycouponserver.model.coupon;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
 
@@ -10,6 +11,7 @@ import java.sql.Timestamp;
 public class ExpiredCourseData {
     @Id
     String couponUrl;
+    @CreationTimestamp
     Timestamp timeStamp;
 
     public ExpiredCourseData() {

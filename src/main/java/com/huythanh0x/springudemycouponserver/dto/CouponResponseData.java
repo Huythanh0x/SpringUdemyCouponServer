@@ -1,20 +1,27 @@
 package com.huythanh0x.springudemycouponserver.dto;
 
-import com.huythanh0x.springudemycouponserver.model.CouponCourseData;
+import com.huythanh0x.springudemycouponserver.model.coupon.CouponCourseData;
 import com.huythanh0x.springudemycouponserver.utils.LastFetchTimeManager;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class CouponResponseData {
-    Long lastFetchTime;
+    LocalDateTime lastFetchTime;
+    Integer couponCount;
     List<CouponCourseData> courses;
 
     public CouponResponseData(List<CouponCourseData> courses) {
         this.courses = courses;
-        this.lastFetchTime = LastFetchTimeManager.loadLasFetchedTimeInMilliSecond();
+        this.couponCount = courses.size();
+        this.lastFetchTime = LastFetchTimeManager.loadLasFetchedTimeInDateTimeString();
     }
 
-    public Long getLastFetchTime() {
+    public Integer getCouponCount() {
+        return couponCount;
+    }
+
+    public LocalDateTime getLastFetchTime() {
         return lastFetchTime;
     }
 

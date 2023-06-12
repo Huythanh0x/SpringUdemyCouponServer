@@ -1,4 +1,4 @@
-package com.huythanh0x.springudemycouponserver.model;
+package com.huythanh0x.springudemycouponserver.model.coupon;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
