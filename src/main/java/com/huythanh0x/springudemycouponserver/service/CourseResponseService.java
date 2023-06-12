@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,14 +18,10 @@ public class CourseResponseService {
         this.couponCourseRepository = couponCourseRepository;
     }
 
-    public List<CouponCourseData> getAllCoupons() {
-        return couponCourseRepository.findAll();
-    }
-
-    public List<CouponCourseData> getNCoupons(Integer numberOfCoupon) {
+    public List<CouponCourseData> getCoupons(String numberOfCoupon) {
         List<CouponCourseData> allCouponCourses = couponCourseRepository.findAll();
-        if (numberOfCoupon < allCouponCourses.size()) {
-            return allCouponCourses.subList(0, numberOfCoupon);
+        if (Integer.parseInt(numberOfCoupon) < allCouponCourses.size()) {
+            return allCouponCourses.subList(0, Integer.parseInt(numberOfCoupon));
         } else {
             return allCouponCourses;
         }

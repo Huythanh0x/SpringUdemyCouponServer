@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/coupons")
+@RequestMapping(value = "api/v1/coupons")
 public class CouponCourseController {
     CourseResponseService courseResponseService;
 
@@ -17,36 +17,29 @@ public class CouponCourseController {
         this.courseResponseService = courseResponseService;
     }
 
-    @GetMapping({"/all", "/", ""})
+    @GetMapping({"/", ""})
     @ResponseBody
-    public List<CouponCourseData> getAll() {
-        return courseResponseService.getAllCoupons();
+    public List<CouponCourseData> getCoupons(@RequestParam(required = false, defaultValue = "100") String numberOfCoupon) {
+        return courseResponseService.getCoupons(numberOfCoupon);
     }
 
-    @PostMapping({"/new"})
+    @PostMapping({"/", ""})
     @ResponseBody
     public CouponCourseData postNewCouponUrl(@RequestParam String couponUrl) {
         return courseResponseService.saveNewCouponUrl(couponUrl);
     }
 
-    @DeleteMapping({"/report", "/delete"})
+    @DeleteMapping({"/", ""})
     @ResponseBody
     public void deleteCoupon(@RequestParam String couponUrl) {
         courseResponseService.deleteCoupon(couponUrl);
     }
 
 
-    @PutMapping({"/update"})
+    @PutMapping({"/", ""})
     @ResponseBody
     public void updateCoupon(@RequestParam String couponId) {
 //        TODO implement later
-    }
-
-
-    @GetMapping("/{numberOfCoupon}")
-    @ResponseBody
-    public List<CouponCourseData> getNCoupons(@PathVariable Integer numberOfCoupon) {
-        return courseResponseService.getNCoupons(numberOfCoupon);
     }
 
     @GetMapping("/filter")
