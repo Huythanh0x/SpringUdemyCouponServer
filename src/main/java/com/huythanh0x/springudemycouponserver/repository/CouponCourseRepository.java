@@ -14,7 +14,6 @@ import java.util.Set;
 public interface CouponCourseRepository extends JpaRepository<CouponCourseData, Integer> {
     List<CouponCourseData> findByTitleContainingOrDescriptionContainingOrHeadingContaining(String title, String description, String heading);
 
-    //String rating, String contentLength, String level, String category, String language
     List<CouponCourseData> findByRatingGreaterThanAndContentLengthGreaterThanAndLevelContainingAndCategoryIsContainingIgnoreCaseAndLanguageContaining(float rating, int contentLength, String level, String category, String language);
 
     @Modifying
