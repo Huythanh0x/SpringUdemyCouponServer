@@ -3,6 +3,10 @@ drop table if exists coupon_course_data;
 drop table if exists log_app_data;
 
 
+drop table if exists users_roles;
+drop table if exists users;
+drop table if exists roles;
+
 CREATE TABLE coupon_course_data
 (
     course_id      INT PRIMARY KEY,
@@ -41,6 +45,34 @@ CREATE TABLE log_app_data
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     content      TEXT
 );
+
+CREATE TABLE roles
+(
+    id   INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE users
+(
+    id       INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE user_roles
+(
+    user_id INT,
+    role_id INT,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    FOREIGN KEY (role_id) REFERENCES roles (id)
+);
+
+INSERT INTO roles(id, name)
+VALUES (1, "USER");
+
+INSERT INTO roles(id, name)
+VALUES (2, "ADMIN");
 
 show
     tables;

@@ -3,11 +3,13 @@ package com.huythanh0x.springudemycouponserver.service;
 import com.huythanh0x.springudemycouponserver.crawler_runner.UdemyCouponCourseExtractor;
 import com.huythanh0x.springudemycouponserver.dto.CouponResponseData;
 import com.huythanh0x.springudemycouponserver.model.coupon.CouponCourseData;
-import com.huythanh0x.springudemycouponserver.model.log.LogCategory;
 import com.huythanh0x.springudemycouponserver.model.log.LogAppData;
+import com.huythanh0x.springudemycouponserver.model.log.LogCategory;
 import com.huythanh0x.springudemycouponserver.repository.CouponCourseRepository;
 import com.huythanh0x.springudemycouponserver.repository.LogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,7 +44,8 @@ public class CourseResponseService {
     }
 
     public CouponResponseData searchCoupons(String querySearch, String remoteAddr) {
-        List<CouponCourseData> searchedCouponCourses = couponCourseRepository.findByTitleContainingOrDescriptionContainingOrHeadingContaining(querySearch, querySearch, querySearch);
+        Pageable pageable = PageRequest.of(2, 10);
+        List<CouponCourseData> searchedCouponCourses = couponCourseRepository.findByTitleContainingOrDescriptionContainingOrHeadingContaining(querySearch, querySearch, querySearch, pageable);
         logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "searchCoupons", String.format("%s responded %s coupons", querySearch, searchedCouponCourses.size())));
         return new CouponResponseData(searchedCouponCourses);
     }
