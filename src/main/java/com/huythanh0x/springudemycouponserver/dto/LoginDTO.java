@@ -3,7 +3,7 @@ package com.huythanh0x.springudemycouponserver.dto;
 import lombok.Data;
 
 @Data
-public class LoginDto {
+public class LoginDTO {
     private String username;
     private String password;
 }

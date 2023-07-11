@@ -1,18 +1,17 @@
 package com.huythanh0x.springudemycouponserver.service;
 
 import com.huythanh0x.springudemycouponserver.crawler_runner.UdemyCouponCourseExtractor;
-import com.huythanh0x.springudemycouponserver.dto.CouponResponseData;
+import com.huythanh0x.springudemycouponserver.dto.PagedCouponResponseDTO;
 import com.huythanh0x.springudemycouponserver.model.coupon.CouponCourseData;
 import com.huythanh0x.springudemycouponserver.model.log.LogAppData;
 import com.huythanh0x.springudemycouponserver.model.log.LogCategory;
 import com.huythanh0x.springudemycouponserver.repository.CouponCourseRepository;
 import com.huythanh0x.springudemycouponserver.repository.LogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class CourseResponseService {
@@ -26,28 +25,25 @@ public class CourseResponseService {
         this.logRepository = logRepository;
     }
 
-    public CouponResponseData getCoupons(String numberOfCoupon, String remoteAddr) {
-        List<CouponCourseData> allCouponCourses = couponCourseRepository.findAll();
-        if (Integer.parseInt(numberOfCoupon) < allCouponCourses.size()) {
-            logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "getCoupons: ", String.format("requested: %s, responded %s", numberOfCoupon, numberOfCoupon)));
-            return new CouponResponseData(allCouponCourses.subList(0, Integer.parseInt(numberOfCoupon)));
-        } else {
-            logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "getCoupons %s: ", String.format("requested: %s coupons, responded %s", numberOfCoupon, allCouponCourses.size())));
-            return new CouponResponseData(allCouponCourses);
-        }
+    public PagedCouponResponseDTO getPagedCoupons(String pageIndex, String numberPerPage, String remoteAddr) {
+        Pageable pageable = PageRequest.of(Integer.parseInt(pageIndex), Integer.parseInt(numberPerPage));
+        Page<CouponCourseData> allCouponCourses = couponCourseRepository.findAll(pageable);
+        logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "getCoupons %s: ", String.format("requested: %s coupons, responded %s", pageIndex, numberPerPage)));
+        return new PagedCouponResponseDTO(allCouponCourses);
     }
 
-    public CouponResponseData filterCoupons(String rating, String contentLength, String level, String category, String language, String remoteAddr) {
-        List<CouponCourseData> filterCouponCourses = couponCourseRepository.findByRatingGreaterThanAndContentLengthGreaterThanAndLevelContainingAndCategoryIsContainingIgnoreCaseAndLanguageContaining(Float.parseFloat(rating), Integer.parseInt(contentLength), level, category, language);
-        logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "filterCoupons", String.format("%s %s %s %s %s: responded %s coupons", rating, contentLength, level, category, language, filterCouponCourses.size())));
-        return new CouponResponseData(filterCouponCourses);
+    public PagedCouponResponseDTO filterCoupons(String rating, String contentLength, String level, String category, String language, String pageIndex, String numberPerPage, String remoteAddr) {
+        Pageable pageable = PageRequest.of(Integer.parseInt(pageIndex), Integer.parseInt(numberPerPage));
+        Page<CouponCourseData> filterCouponCourses = couponCourseRepository.findByRatingGreaterThanAndContentLengthGreaterThanAndLevelContainingAndCategoryIsContainingIgnoreCaseAndLanguageContaining(Float.parseFloat(rating), Integer.parseInt(contentLength), level, category, language, pageable);
+        logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "filterCoupons", String.format("%s %s %s %s %s: responded %s coupons", rating, contentLength, level, category, language, filterCouponCourses.getTotalElements())));
+        return new PagedCouponResponseDTO(filterCouponCourses);
     }
 
-    public CouponResponseData searchCoupons(String querySearch, String remoteAddr) {
-        Pageable pageable = PageRequest.of(2, 10);
-        List<CouponCourseData> searchedCouponCourses = couponCourseRepository.findByTitleContainingOrDescriptionContainingOrHeadingContaining(querySearch, querySearch, querySearch, pageable);
-        logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "searchCoupons", String.format("%s responded %s coupons", querySearch, searchedCouponCourses.size())));
-        return new CouponResponseData(searchedCouponCourses);
+    public PagedCouponResponseDTO searchCoupons(String querySearch, String pageIndex, String numberPerPage, String remoteAddr) {
+        Pageable pageable = PageRequest.of(Integer.parseInt(pageIndex), Integer.parseInt(numberPerPage));
+        Page<CouponCourseData> searchedCouponCourses = couponCourseRepository.findByTitleContainingOrDescriptionContainingOrHeadingContaining(querySearch, querySearch, querySearch, pageable);
+        logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "searchCoupons", String.format("%s responded %s coupons", querySearch, searchedCouponCourses.getTotalElements())));
+        return new PagedCouponResponseDTO(searchedCouponCourses);
     }
 
     public CouponCourseData saveNewCouponUrl(String couponUrl, String remoteAddr) {

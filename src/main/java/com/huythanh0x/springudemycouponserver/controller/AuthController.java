@@ -1,8 +1,8 @@
 package com.huythanh0x.springudemycouponserver.controller;
 
 import com.huythanh0x.springudemycouponserver.dto.AuthResponseDTO;
-import com.huythanh0x.springudemycouponserver.dto.LoginDto;
-import com.huythanh0x.springudemycouponserver.dto.RegisterDto;
+import com.huythanh0x.springudemycouponserver.dto.LoginDTO;
+import com.huythanh0x.springudemycouponserver.dto.RegisterDTO;
 import com.huythanh0x.springudemycouponserver.model.user.Role;
 import com.huythanh0x.springudemycouponserver.model.user.UserEntity;
 import com.huythanh0x.springudemycouponserver.repository.RoleRepository;
@@ -47,7 +47,7 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDTO loginDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginDto.getUsername(),
@@ -58,7 +58,7 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
+    public ResponseEntity<String> register(@RequestBody RegisterDTO registerDto) {
         if (userRepository.existsByUsername(registerDto.getUsername())) {
             return new ResponseEntity<>("Username is taken!", HttpStatus.BAD_REQUEST);
         }
