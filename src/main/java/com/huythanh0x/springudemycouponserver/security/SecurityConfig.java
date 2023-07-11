@@ -40,7 +40,8 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
 //                .anyRequest().permitAll()
-                .requestMatchers("/api/v1/auth/*").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();

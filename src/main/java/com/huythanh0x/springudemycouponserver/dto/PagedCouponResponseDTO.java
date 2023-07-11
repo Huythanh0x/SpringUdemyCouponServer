@@ -2,11 +2,17 @@ package com.huythanh0x.springudemycouponserver.dto;
 
 import com.huythanh0x.springudemycouponserver.model.coupon.CouponCourseData;
 import com.huythanh0x.springudemycouponserver.utils.LastFetchTimeManager;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PagedCouponResponseDTO {
     LocalDateTime lastFetchTime;
     Long totalCoupon;
@@ -20,25 +26,5 @@ public class PagedCouponResponseDTO {
         this.currentPage = courses.getPageable().getPageNumber();
         this.courses = courses.getContent();
         this.lastFetchTime = LastFetchTimeManager.loadLasFetchedTimeInDateTimeString();
-    }
-
-    public Long getTotalCoupon() {
-        return totalCoupon;
-    }
-
-    public Integer getTotalPage() {
-        return totalPage;
-    }
-
-    public Integer getCurrentPage() {
-        return currentPage;
-    }
-
-    public LocalDateTime getLastFetchTime() {
-        return lastFetchTime;
-    }
-
-    public List<CouponCourseData> getCourses() {
-        return courses;
     }
 }

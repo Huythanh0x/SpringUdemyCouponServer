@@ -2,6 +2,7 @@ package com.huythanh0x.springudemycouponserver.service;
 
 import com.huythanh0x.springudemycouponserver.crawler_runner.UdemyCouponCourseExtractor;
 import com.huythanh0x.springudemycouponserver.dto.PagedCouponResponseDTO;
+import com.huythanh0x.springudemycouponserver.exception.BadRequestException;
 import com.huythanh0x.springudemycouponserver.model.coupon.CouponCourseData;
 import com.huythanh0x.springudemycouponserver.model.log.LogAppData;
 import com.huythanh0x.springudemycouponserver.model.log.LogCategory;
@@ -26,6 +27,7 @@ public class CourseResponseService {
     }
 
     public PagedCouponResponseDTO getPagedCoupons(String pageIndex, String numberPerPage, String remoteAddr) {
+        handlePagingParameters(pageIndex, numberPerPage);
         Pageable pageable = PageRequest.of(Integer.parseInt(pageIndex), Integer.parseInt(numberPerPage));
         Page<CouponCourseData> allCouponCourses = couponCourseRepository.findAll(pageable);
         logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "getCoupons %s: ", String.format("requested: %s coupons, responded %s", pageIndex, numberPerPage)));
@@ -33,6 +35,7 @@ public class CourseResponseService {
     }
 
     public PagedCouponResponseDTO filterCoupons(String rating, String contentLength, String level, String category, String language, String pageIndex, String numberPerPage, String remoteAddr) {
+        handlePagingParameters(pageIndex, numberPerPage);
         Pageable pageable = PageRequest.of(Integer.parseInt(pageIndex), Integer.parseInt(numberPerPage));
         Page<CouponCourseData> filterCouponCourses = couponCourseRepository.findByRatingGreaterThanAndContentLengthGreaterThanAndLevelContainingAndCategoryIsContainingIgnoreCaseAndLanguageContaining(Float.parseFloat(rating), Integer.parseInt(contentLength), level, category, language, pageable);
         logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "filterCoupons", String.format("%s %s %s %s %s: responded %s coupons", rating, contentLength, level, category, language, filterCouponCourses.getTotalElements())));
@@ -40,6 +43,7 @@ public class CourseResponseService {
     }
 
     public PagedCouponResponseDTO searchCoupons(String querySearch, String pageIndex, String numberPerPage, String remoteAddr) {
+        handlePagingParameters(pageIndex, numberPerPage);
         Pageable pageable = PageRequest.of(Integer.parseInt(pageIndex), Integer.parseInt(numberPerPage));
         Page<CouponCourseData> searchedCouponCourses = couponCourseRepository.findByTitleContainingOrDescriptionContainingOrHeadingContaining(querySearch, querySearch, querySearch, pageable);
         logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "searchCoupons", String.format("%s responded %s coupons", querySearch, searchedCouponCourses.getTotalElements())));
@@ -55,6 +59,18 @@ public class CourseResponseService {
         if (new UdemyCouponCourseExtractor(couponUrl).getFullCouponCodeData() == null) {
             logRepository.save(new LogAppData(LogCategory.REQUEST, remoteAddr, "deleteCoupon", couponUrl));
             couponCourseRepository.deleteByCouponUrl(couponUrl);
+        }
+    }
+
+    public void handlePagingParameters(String pageIndex, String numberPerPage) {
+        try {
+            Integer.parseInt(pageIndex);
+            Integer.parseInt(numberPerPage);
+        } catch (Exception e) {
+            throw new BadRequestException(e.toString());
+        }
+        if (Integer.parseInt(pageIndex) < 0 || Integer.parseInt(numberPerPage) < 0) {
+            throw new BadRequestException("Page index and number of course per page cannot be negative");
         }
     }
 }

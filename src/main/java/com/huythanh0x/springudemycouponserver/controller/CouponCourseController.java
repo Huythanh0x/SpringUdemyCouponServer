@@ -21,7 +21,7 @@ public class CouponCourseController {
 
     @GetMapping({"/", ""})
     @ResponseBody
-    public PagedCouponResponseDTO getCoupons(@RequestParam(required = false, defaultValue = "0") String pageIndex, @RequestParam(required = false, defaultValue = "10") String numberPerPage, HttpServletRequest request) {
+    public PagedCouponResponseDTO getCoupons(@RequestParam(required = false,  defaultValue = "0") String pageIndex, @RequestParam(required = false,  defaultValue = "10") String numberPerPage, HttpServletRequest request) {
         return courseResponseService.getPagedCoupons(pageIndex, numberPerPage, request.getRemoteAddr());
     }
 
@@ -45,13 +45,13 @@ public class CouponCourseController {
     }
 
     @GetMapping("/filter")
-    public PagedCouponResponseDTO filterCoupons(@RequestParam(defaultValue = "") String category, @RequestParam(defaultValue = "-1") String rating, @RequestParam(defaultValue = "-1") String contentLength, @RequestParam(defaultValue = "") String level, @RequestParam(defaultValue = "") String language, @RequestParam(required = false, defaultValue = "0") String pageIndex, @RequestParam(required = false, defaultValue = "10") String numberPerPage, HttpServletRequest request) {
+    public PagedCouponResponseDTO filterCoupons(@RequestParam(defaultValue = "") String category, @RequestParam(defaultValue = "-1") String rating, @RequestParam(defaultValue = "-1") String contentLength, @RequestParam(defaultValue = "") String level, @RequestParam(defaultValue = "") String language, @RequestParam(required = false,  defaultValue = "0") String pageIndex, @RequestParam(required = false,  defaultValue = "10") String numberPerPage, HttpServletRequest request) {
         return courseResponseService.filterCoupons(rating, contentLength, level, category, language, request.getRemoteAddr(), pageIndex, numberPerPage);
     }
 
 
     @GetMapping("/search")
-    public PagedCouponResponseDTO searchCoupons(@RequestParam String querySearch, @RequestParam(required = false, defaultValue = "0") String pageIndex, @RequestParam(required = false, defaultValue = "10") String numberPerPage, HttpServletRequest request) {
+    public PagedCouponResponseDTO searchCoupons(@RequestParam String querySearch, @RequestParam(required = false, defaultValue = "0") String pageIndex, @RequestParam(required = false,  defaultValue = "10") String numberPerPage, HttpServletRequest request) {
         return courseResponseService.searchCoupons(querySearch, pageIndex, numberPerPage, request.getRemoteAddr());
     }
 }
