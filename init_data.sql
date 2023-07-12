@@ -1,3 +1,4 @@
+create database if not exists  coupon;
 drop table if exists expired_course_data;
 drop table if exists coupon_course_data;
 drop table if exists log_app_data;
